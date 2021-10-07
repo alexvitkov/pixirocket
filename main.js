@@ -4,7 +4,7 @@ const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
 const ROCKET_SCALE = 1.5;
 const ROCKET_SPEED = 2;
-const START_Y = CANVAS_HEIGHT - 30;
+const BOTTOM_Y_OFFSET = 30;
 
 const app = new PIXI.Application({
     width: CANVAS_WIDTH,
@@ -21,8 +21,13 @@ app.stage.addChild(background);
 
 // Load the rocket textures
 const rocketTexture = PIXI.Texture.from("assets/rocket.png");
+const thrustTexture = PIXI.Texture.from("assets/thrust.png");
 
 let time = 0.0;
+
+function random(min, max) {
+    return Math.random() * (max - min) + min;
+}
 
 class FuelBar {
     constructor(width, height) {
@@ -60,21 +65,27 @@ class Rocket {
 
         this.container = new PIXI.Container();
 
-        // The label that shows the rocket's name under the sprite
-        let label = new PIXI.Text(rocketData.name, { fontFamily: 'Arial', fontSize: 20, fill: 0xffffff });
-        this.container.addChild(label);
-        label.anchor.set(0.5);
-        label.y = 10;
 
 
         // The rocket sprite itself
         this.rocketSprite = new PIXI.Sprite(rocketTexture);
         this.rocketSprite.anchor.set(0.5, 1);
+
+        this.rocketScale = rocketData.height.meters * ROCKET_SCALE / rocketTexture.height;
+        this.rocketSprite.scale.set(this.rocketScale);
+
+
+        this.thrustSprite = new PIXI.Sprite(thrustTexture);
+        this.thrustSprite.anchor.set(0.5, 0.1);
+
+        this.container.addChild(this.thrustSprite);
         this.container.addChild(this.rocketSprite);
 
-        const rocketScale = rocketData.height.meters * ROCKET_SCALE / rocketTexture.height;
-        this.rocketSprite.width = rocketScale * rocketTexture.width;
-        this.rocketSprite.height = rocketScale * rocketTexture.height;
+        // The label that shows the rocket's name under the sprite
+        let label = new PIXI.Text(rocketData.name, { fontFamily: 'Arial', fontSize: 20, fill: 0xffffff });
+        this.container.addChild(label);
+        label.anchor.set(0.5);
+        label.y = -this.rocketSprite.height - 15;
 
 
         // Fuel bar
@@ -82,20 +93,30 @@ class Rocket {
         this.container.addChild(this.fuelBar1.container);
         this.fuelBar1.container.x = this.rocketSprite.width/2 + 5;
 
-        this.fuelBar2 = new FuelBar(10, this.rocketSprite.height);
+        this.fuelBar2 = new FuelBar(10, this.rocketSprite.height * this.fuel2 / this.fuel1);
         this.container.addChild(this.fuelBar2.container);
         this.fuelBar2.container.x = this.rocketSprite.width/2 + 15;
 
         // Initial position of the container
         this.container.x = x;
-        this.container.y = START_Y;
         app.stage.addChild(this.container);
 
         // Register tick function
         app.ticker.add(this.tick.bind(this));
     }
 
-    tick(dt) {
+    get_fuel_percentage() {
+        return (this.fuel1 + this.fuel2) / (this.initialFuel1 + this.initialFuel2);
+    }
+
+
+    update_y() {
+        let percentage = this.get_fuel_percentage();
+        let y = (CANVAS_HEIGHT - this.rocketSprite.height) * percentage + this.rocketSprite.height;// - this.rocketSprite.height * percentage;
+        this.container.y = y;
+    }
+
+    tick() {
         if (this.fuel1 > 0) {
             this.fuel1 -= app.ticker.deltaTime;
             if (this.fuel1 < 0)
@@ -110,8 +131,10 @@ class Rocket {
         this.fuelBar1.update(this.fuel1 / this.initialFuel1);
         this.fuelBar2.update(this.fuel2 / this.initialFuel2);
 
-        this.container.y -= ROCKET_SPEED * dt;
+        this.update_y();
 
+        this.thrustSprite.rotation = Math.random() * 0.1;
+        this.thrustSprite.scale.set(this.rocketScale * random(0.9, 1.1));
     }
 };
 
