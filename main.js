@@ -2,7 +2,7 @@ console.log(PIXI)
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
-const ROCKET_SCALE = 1.5;
+const ROCKET_SCALE = 0.015;
 const ROCKET_SPEED = 2;
 const BOTTOM_Y_OFFSET = 30;
 
@@ -20,7 +20,8 @@ background.height = CANVAS_HEIGHT;
 app.stage.addChild(background);
 
 // Load the rocket textures
-const rocketTexture = PIXI.Texture.from("assets/rocket.png");
+const rocketTopTexture = PIXI.Texture.from("assets/rocket_top.png");
+const rocketBottomTexture = PIXI.Texture.from("assets/rocket_bottom.png");
 const thrustTexture = PIXI.Texture.from("assets/thrust.png");
 
 let time = 0.0;
@@ -68,32 +69,36 @@ class Rocket {
 
 
         // The rocket sprite itself
-        this.rocketSprite = new PIXI.Sprite(rocketTexture);
-        this.rocketSprite.anchor.set(0.5, 1);
+        this.rocketSprite = new PIXI.Sprite(rocketTopTexture);
+        this.rocketBottomSprite = new PIXI.Sprite(rocketBottomTexture);
+        this.rocketSprite.anchor.set(0.5, 1.5);
+        this.rocketBottomSprite.anchor.set(0.5, 1);
 
-        this.rocketScale = rocketData.height.meters * ROCKET_SCALE / rocketTexture.height;
-        this.rocketSprite.scale.set(this.rocketScale);
+        this.rocketScale = rocketData.height.meters * ROCKET_SCALE;
+        this.rocketSize = this.rocketScale * (rocketTopTexture.height + rocketBottomTexture.height);
 
+        this.rocketSprite.scale.set(this.rocketScale)
+        this.rocketBottomSprite.scale.set(this.rocketScale);
 
         this.thrustSprite = new PIXI.Sprite(thrustTexture);
         this.thrustSprite.anchor.set(0.5, 0.1);
 
         this.container.addChild(this.thrustSprite);
         this.container.addChild(this.rocketSprite);
+        this.container.addChild(this.rocketBottomSprite);
 
         // The label that shows the rocket's name under the sprite
         let label = new PIXI.Text(rocketData.name, { fontFamily: 'Arial', fontSize: 20, fill: 0xffffff });
         this.container.addChild(label);
         label.anchor.set(0.5);
-        label.y = -this.rocketSprite.height - 15;
-
+        label.y = -this.rocketSize - 15;
 
         // Fuel bar
-        this.fuelBar1 = new FuelBar(10, this.rocketSprite.height);
+        this.fuelBar1 = new FuelBar(10, this.rocketSize);
         this.container.addChild(this.fuelBar1.container);
         this.fuelBar1.container.x = this.rocketSprite.width/2 + 5;
 
-        this.fuelBar2 = new FuelBar(10, this.rocketSprite.height * this.fuel2 / this.fuel1);
+        this.fuelBar2 = new FuelBar(10, this.rocketSize * this.fuel2 / this.fuel1);
         this.container.addChild(this.fuelBar2.container);
         this.fuelBar2.container.x = this.rocketSprite.width/2 + 15;
 
@@ -112,7 +117,7 @@ class Rocket {
 
     update_y() {
         let percentage = this.get_fuel_percentage();
-        let y = (CANVAS_HEIGHT - this.rocketSprite.height) * percentage + this.rocketSprite.height;// - this.rocketSprite.height * percentage;
+        let y = (CANVAS_HEIGHT - this.rocketSize) * percentage + this.rocketSize;
         this.container.y = y;
     }
 
@@ -154,6 +159,3 @@ async function loadRockets() {
 }
 
 loadRockets();
-
-// const rocketTexture = PIXI.Texture.from("assets/rocket.png");
-// const rocketSprite = new PIXI.Sprite(rocketTexture);
