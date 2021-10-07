@@ -25,24 +25,30 @@ let time = 0.0;
 
 class Rocket {
     constructor(x, rocketData) {
-        this.rocketSprite = new PIXI.Sprite(rocketTexture);
         this.rocketData = rocketData;
+
+        this.container = new PIXI.Container();
         
         const rocketScale = rocketData.height.meters * ROCKET_SCALE / rocketTexture.height;
+
+        this.rocketSprite = new PIXI.Sprite(rocketTexture);
+        this.rocketSprite.anchor.set(0.5, 1);
+        this.container.addChild(this.rocketSprite);
 
         this.rocketSprite.width = rocketScale * rocketTexture.width;
         this.rocketSprite.height = rocketScale * rocketTexture.height;
 
-        this.rocketSprite.x = x;
-        this.rocketSprite.y = CANVAS_HEIGHT - this.rocketSprite.height;
+        this.container.x = x;
+        this.container.y = CANVAS_HEIGHT;
 
-        app.stage.addChild(this.rocketSprite);
+        app.stage.addChild(this.container);
 
         app.ticker.add(this.tick.bind(this));
     }
 
     tick(dt) {
-        this.rocketSprite.y -= ROCKET_SPEED * dt;
+        this.container.y -= ROCKET_SPEED * dt;
+        this.container.rotation = Math.random() * 0.05;
     }
 };
 
