@@ -4,6 +4,7 @@ const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
 const ROCKET_SCALE = 1.5;
 const ROCKET_SPEED = 2;
+const START_Y = CANVAS_HEIGHT - 30;
 
 const app = new PIXI.Application({
     width: CANVAS_WIDTH,
@@ -28,7 +29,13 @@ class Rocket {
         this.rocketData = rocketData;
 
         this.container = new PIXI.Container();
-        
+        let label = new PIXI.Text(rocketData.name, { fontFamily: 'Arial', fontSize: 20, fill: 0xffffff, align: 'right' });
+        label.anchor.set(0.5);
+        label.y = 10;
+
+        this.container.addChild(label);
+
+
         const rocketScale = rocketData.height.meters * ROCKET_SCALE / rocketTexture.height;
 
         this.rocketSprite = new PIXI.Sprite(rocketTexture);
@@ -39,7 +46,7 @@ class Rocket {
         this.rocketSprite.height = rocketScale * rocketTexture.height;
 
         this.container.x = x;
-        this.container.y = CANVAS_HEIGHT;
+        this.container.y = START_Y;
 
         app.stage.addChild(this.container);
 
@@ -48,7 +55,6 @@ class Rocket {
 
     tick(dt) {
         this.container.y -= ROCKET_SPEED * dt;
-        this.container.rotation = Math.random() * 0.05;
     }
 };
 
@@ -58,16 +64,16 @@ async function loadRockets() {
     const resp = await fetch("https://api.spacexdata.com/v2/rockets");
     const rocketsData = await resp.json();
 
-    let x = 0;
+    let xAdd = CANVAS_WIDTH / (rocketsData.length + 1);
+    let x = xAdd;
 
     for (const rocketData of rocketsData) {
         new Rocket(x, rocketData);
-        x += 150;
+        x += xAdd;
     }
 }
 
 loadRockets();
-
 
 // const rocketTexture = PIXI.Texture.from("assets/rocket.png");
 // const rocketSprite = new PIXI.Sprite(rocketTexture);
