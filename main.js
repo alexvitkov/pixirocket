@@ -53,7 +53,8 @@ class FuelBar {
 
 class Rocket {
     constructor(x, rocketData) {
-        this.percentFuel = 1.0;
+        this.initialFuel1 = this.fuel1 = rocketData.first_stage.fuel_amount_tons;
+        this.initialFuel2 = this.fuel2 = rocketData.second_stage.fuel_amount_tons;
 
         this.rocketData = rocketData;
 
@@ -77,10 +78,13 @@ class Rocket {
 
 
         // Fuel bar
-        this.fuelBar = new FuelBar(10, this.rocketSprite.height);
-        this.container.addChild(this.fuelBar.container);
+        this.fuelBar1 = new FuelBar(10, this.rocketSprite.height);
+        this.container.addChild(this.fuelBar1.container);
+        this.fuelBar1.container.x = this.rocketSprite.width/2 + 5;
 
-        this.fuelBar.container.x = this.rocketSprite.width/2 + 5;
+        this.fuelBar2 = new FuelBar(10, this.rocketSprite.height);
+        this.container.addChild(this.fuelBar2.container);
+        this.fuelBar2.container.x = this.rocketSprite.width/2 + 15;
 
         // Initial position of the container
         this.container.x = x;
@@ -92,10 +96,22 @@ class Rocket {
     }
 
     tick(dt) {
-        this.percentFuel -= 0.003 * dt;
+        if (this.fuel1 > 0) {
+            this.fuel1 -= app.ticker.deltaTime;
+            if (this.fuel1 < 0)
+                this.fuel1 = 0;
+        }
+        else {
+            this.fuel2 -= app.ticker.deltaTime;
+            if (this.fuel2 < 0)
+                this.fuel2 = 0;
+        }
+
+        this.fuelBar1.update(this.fuel1 / this.initialFuel1);
+        this.fuelBar2.update(this.fuel2 / this.initialFuel2);
+
         this.container.y -= ROCKET_SPEED * dt;
 
-        this.fuelBar.update(this.percentFuel);
     }
 };
 
