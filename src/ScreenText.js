@@ -5,7 +5,7 @@ import * as Config from "./Config";
 function animateText(text) {
 
     let scaleAdd = 0;
-    let yAdd = 1.3;
+    let yAdd = 1.5;
 
     const tickerFn = () => {
         const dt = App.ticker.deltaTime;
@@ -19,7 +19,7 @@ function animateText(text) {
             yAdd = 0;
         text.y -= yAdd * dt;
 
-        text.alpha -= 0.01 * dt;
+        text.alpha -= 0.007 * dt;
         if (text.alpha <= 0) {
             App.ticker.remove(tickerFn);
             text.destroy();
