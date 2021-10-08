@@ -31,8 +31,12 @@ const thrustTexture = PIXI.Texture.from("assets/thrust.png");
 
 let time = 0.0;
 
+function lerp(min, max, t) {
+    return t * (max - min) + min;
+}
+
 function random(min, max) {
-    return Math.random() * (max - min) + min;
+    return lerp(min, max, Math.random());
 }
 
 function clamp(val, min, max) {
@@ -42,6 +46,7 @@ function clamp(val, min, max) {
         return max;
     return val;
 }
+
 
 class FuelBar {
     constructor(width, height) {
@@ -131,7 +136,8 @@ class Rocket {
         this.rocketBottomSprite.scale.set(this.rocketScale);
 
         this.thrustSprite = new PIXI.Sprite(thrustTexture);
-        this.thrustSprite.anchor.set(0.5, 0.1);
+        this.thrustAnchor = 0.1;
+        this.thrustSprite.anchor.set(0.5, this.thrustAnchor);
 
         this.container.addChild(this.thrustSprite);
         this.container.addChild(this.rocketSprite);
@@ -195,7 +201,11 @@ class Rocket {
             this.fuel2 -= app.ticker.deltaTime;
             if (this.fuel2 < 0)
                 this.fuel2 = 0;
+
+            this.thrustAnchor = lerp(this.thrustAnchor, 0.5, 0.1 * app.ticker.deltaTime);
+            this.thrustSprite.anchor.set(0.5, this.thrustAnchor);
         }
+
 
         this.fuelBar1.update(this.fuel1 / this.initialFuel1);
         this.fuelBar2.update(this.fuel2 / this.initialFuel2);
