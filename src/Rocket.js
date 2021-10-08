@@ -102,7 +102,19 @@ export default class Rocket {
         p = 1 - (1 - p) * (1 - p); 
 
         let oldY = this.container.y;
-        let newY = (Config.SCREEN_HEIGHT ) * p;
+
+        // I've made it so the rockets reach a height based on the logarithm of their fuel capacity
+        //
+        // This is the only sensible option I see, because if all rockets reach the top of the screen,
+        // they will travel at vastly different speeds due to the constant fuel burn of 1 ton/s and their vastly
+        // different fuel capacities.
+        // 
+        // If on the other hand they reach a distance based linearly on their fuel capacity,
+        // the smallest rocket will barely move at all on the screen before disappearing, as the
+        // Starship would have to go 70x higher, due to its 70x higher fuel capacity
+        let maxHeightReached = Math.log(this.stage1Fuel + this.stage2Fuel) / 10 * Config.SCREEN_HEIGHT;
+
+        let newY = Config.SCREEN_HEIGHT - maxHeightReached * (1 - p);
         this.container.y = newY;
 
         // yVelocity is needed for when we lose the bottom part of the rocket
@@ -160,5 +172,7 @@ export default class Rocket {
             const thrustTargetY = -this.rocketScale * rocketBottomTexture.height;
             this.thrustSprite.y = lerp(this.thrustSprite.y, thrustTargetY, 0.1 * dt);
         }
+
+        this.container.alpha = clamp(3 * this.fuel / timeScale , 0, 1);
     }
 };
