@@ -163,7 +163,13 @@ class Rocket {
         app.stage.addChild(this.container);
 
         // Register tick function
-        app.ticker.add(this.tick.bind(this));
+        this.tickFn = this.tick.bind(this);
+        app.ticker.add(this.tickFn);
+    }
+
+    destroy() {
+        this.container.destroy();
+        app.ticker.remove(this.tickFn);
     }
 
     lose_bottom_part() {
@@ -199,8 +205,12 @@ class Rocket {
         }
         else {
             this.fuel2 -= app.ticker.deltaTime;
-            if (this.fuel2 < 0)
+            if (this.fuel2 < 0) {
                 this.fuel2 = 0;
+
+                this.destroy();
+                return;
+            }
 
             this.thrustAnchor = lerp(this.thrustAnchor, 0.5, 0.1 * app.ticker.deltaTime);
             this.thrustSprite.anchor.set(0.5, this.thrustAnchor);
