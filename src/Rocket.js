@@ -2,6 +2,7 @@ import * as Config from "./Config";
 import FuelBar from "./FuelBar";
 import FloatingBottomPart from "./FloatingBottomPart";
 import app from "./App";
+import * as ScreenText from "./ScreenText";
 import { random, lerp, clamp } from "./Util";
 
 // Load the rocket textures
@@ -15,6 +16,7 @@ export default class Rocket {
         this.initialFuel2 = this.fuel2 = rocketData.second_stage.fuel_amount_tons;
 
         this.rocketData = rocketData;
+        this.launched = false;
 
         this.container = new PIXI.Container();
 
@@ -64,8 +66,13 @@ export default class Rocket {
         app.ticker.add(this.tickFn);
     }
 
+    launch() {
+        this.launched = true;
+    }
+
     destroy() {
         this.container.destroy();
+        ScreenText.write(this.rocketData.name + " launched!");
         app.ticker.remove(this.tickFn);
     }
 
@@ -93,6 +100,10 @@ export default class Rocket {
     }
 
     tick() {
+        this.update_y();
+        if (!this.launched)
+            return;
+
         if (this.fuel1 > 0) {
             this.fuel1 -= app.ticker.deltaTime;
             if (this.fuel1 <= 0) {
@@ -117,7 +128,6 @@ export default class Rocket {
         this.fuelBar1.update(this.fuel1 / this.initialFuel1);
         this.fuelBar2.update(this.fuel2 / this.initialFuel2);
 
-        this.update_y();
 
         this.thrustSprite.rotation = Math.random() * 0.1;
         this.thrustSprite.scale.set(this.rocketScale * random(0.9, 1.1));
