@@ -7,6 +7,11 @@ You need to spin up up a static http server, otherwise pixi won't load the textu
 The code is split into ES6 modules and uses the esbuild bundler. 
 TODO the `bundle.js` will be included in the final repo so you don't have to bother rebuilding it.
 
+## Time Scale Problem
+It's required that all rockets burn fuel at a rate of 1 tone/s, 
+but the Starship has 3300 tons, so in order for the animation not to take an hour,
+I'm using 20:1 time scaling, which can further be increased by a button.
+
 
 ## Rebuilding bundle.js
 ```bash
@@ -14,7 +19,7 @@ $ npm install # need to run once
 $ npm run bundle
 ```
 
-# The problem
+## The problem
 Recreate all rockets from the SpaceX API and visualize them on a canvas stage. At first, all rockets should be at the bottom of the stage and should launch at the same time and should move towards the top of the stage. All rockets have a certain amount of fuel (first_stage, second_stage).
 
 Requirements:

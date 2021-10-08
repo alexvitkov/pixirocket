@@ -133,8 +133,9 @@ export default class Rocket {
             return;
 
         const dt = app.ticker.deltaTime;
+        const dt_seconds = app.ticker.deltaMS / 1000;
 
-        this.fuel -= timeScale * dt;
+        this.fuel -= timeScale * dt_seconds;
 
         if (this.fuel < this.stage2Fuel && this.stage == 1)
             this.enterStage2();

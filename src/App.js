@@ -15,10 +15,10 @@ export default app = new PIXI.Application({
 // and the problem requires that they all burn 1 ton every second
 // they will finish in vastly different times.
 // Without a time scale option, the starship will take like 5 minutes to deplete its fuel
-export var timeScale = 1.0;
+export var timeScale = 20.0;
 window['increaseTimeScale'] = function() {
-    timeScale *= 1.2;
-    Text.write(`Time scale: ${Math.floor(timeScale * 100)}%`, {
+    timeScale *= 1.5;
+    Text.write(`Time scale: ${Math.floor(timeScale)}:1`, {
         location: 'left',
         group: 1,
     });
@@ -38,7 +38,6 @@ function launchRockets(afterSeconds) {
             rocket.onDestroy(() => {
                 aliveRocketsCount -= 1;
 
-                console.log(aliveRocketsCount)
                 if (aliveRocketsCount == 0)
                     setTimeout(() => Text.write('Success!'), 1000);
             });
