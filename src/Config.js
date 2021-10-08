@@ -1,5 +1,5 @@
-export const CANVAS_WIDTH = 800;
-export const CANVAS_HEIGHT = 600;
+export const SCREEN_WIDTH = 800;
+export const SCREEN_HEIGHT = 600;
 
 export const ROCKET_SCALE = 0.015;
 export const ROCKET_SPEED = 2;

@@ -43,8 +43,8 @@ export function write(text) {
         strokeThickness: 5,
     });
     label.anchor.set(.5);
-    label.x = Config.CANVAS_WIDTH / 2;
-    label.y = Config.CANVAS_HEIGHT / 2;
+    label.x = Config.SCREEN_WIDTH / 2;
+    label.y = Config.SCREEN_HEIGHT / 2;
     label.zIndex = 1000;
     App.stage.addChild(label);
     animateText(label);

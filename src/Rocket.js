@@ -12,8 +12,10 @@ const thrustTexture = PIXI.Texture.from("assets/thrust.png");
 
 export default class Rocket {
     constructor(x, rocketData) {
-        this.initialFuel1 = this.fuel1 = rocketData.first_stage.fuel_amount_tons;
-        this.initialFuel2 = this.fuel2 = rocketData.second_stage.fuel_amount_tons;
+        this.fuel1 = rocketData.first_stage.fuel_amount_tons;
+        this.fuel2 = rocketData.second_stage.fuel_amount_tons;
+        this.initialFuel1 = this.fuel1;
+        this.initialFuel2 = this.fuel2;
 
         this.rocketData = rocketData;
         this.launched = false;
@@ -90,7 +92,7 @@ export default class Rocket {
 
         p = 1 - (1 - p) * (1 - p); // square interpolation looks nicer
 
-        let new_y = (Config.CANVAS_HEIGHT ) * p ;
+        let new_y = (Config.SCREEN_HEIGHT ) * p ;
         let old_y = this.container.y;
         this.container.y = new_y;
 
