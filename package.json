@@ -1,0 +1,24 @@
+{
+    "name": "pixi",
+    "version": "1.0.0",
+    "description": "Recreate all rockets from the SpaceX API and visualize them on a canvas stage. At first, all rockets should be at the bottom of the stage and should launch at the same time and should move towards the top of the stage. All rockets have a certain amount of fuel (first_stage, second_stage).",
+    "main": "main.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "bundle": "esbuild --bundle main.js --outfile=bundle.js --minify --sourcemap"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/alexvitkov/pixirocket.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/alexvitkov/pixirocket/issues"
+    },
+    "homepage": "https://github.com/alexvitkov/pixirocket#readme",
+    "dependencies": {
+        "esbuild": "^0.13.4"
+    }
+}
