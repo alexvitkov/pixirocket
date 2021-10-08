@@ -98,10 +98,9 @@ export default class Rocket {
         // fade-in interpolation looks nicer.
         p = 1 - (1 - p) * (1 - p); 
 
+        let oldY = this.container.y;
         let newY = (Config.SCREEN_HEIGHT ) * p;
         this.container.y = newY;
-
-        let oldY = this.container.y;
 
         // yVelocity is needed for when we lose the bottom part of the rocket
         // so we can give it a sensible initial velocity
