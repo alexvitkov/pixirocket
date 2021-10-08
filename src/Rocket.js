@@ -122,6 +122,7 @@ export default class Rocket {
 
     }
 
+    // Set a callback function to be called when the ship is destroyed (out of fuel and out of screen)
     onDestroy(fn) {
         this.onDestroyCallback = fn;
     }
@@ -145,6 +146,8 @@ export default class Rocket {
             return;
         }
 
+        // Add some random rotation/scale to the thrust every frame
+        // to make it look more "fire-like"
         this.thrustSprite.rotation = Math.random() * 0.1;
         this.thrustSprite.scale.set(this.rocketScale * random(0.9, 1.1));
 
