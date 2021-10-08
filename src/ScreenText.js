@@ -6,14 +6,16 @@ const groups = [];
 
 
 class Text {
-    constructor(label) {
+    constructor(label, animatePosition) {
         this.scaleAdd = 0;
         this.yAdd = Config.ScreenText.INITIAL_Y_SPEED;
         this.text = label;
         this.isAlive = true;
+        this.animatePosition = animatePosition;
 
         this.tickerFn = this.tick.bind(this);
         App.ticker.add(this.tickerFn);
+
     }
 
     destroy() {
@@ -26,13 +28,15 @@ class Text {
         const dt = App.ticker.deltaTime;
         this.scaleAdd -= 0.0001 * dt;
 
-        const scale = this.text.scale.x + this.scaleAdd * dt;
-        this.text.scale.set(scale);
+        if (this.animatePosition) {
+            const scale = this.text.scale.x + this.scaleAdd * dt;
+            this.text.scale.set(scale);
 
-        this.yAdd += Config.ScreenText.Y_SPEED_CHANGE * dt;
-        if (this.yAdd < 0)
-            this.yAdd = 0;
-        this.text.y -= this.yAdd * dt;
+            this.yAdd += Config.ScreenText.Y_SPEED_CHANGE * dt;
+            if (this.yAdd < 0)
+                this.yAdd = 0;
+            this.text.y -= this.yAdd * dt;
+        }
 
         this.text.alpha -= Config.ScreenText.ALPHA_DECREASE * dt;
         if (this.text.alpha <= 0)
@@ -46,6 +50,7 @@ export function write(text, options) {
         fontSize: 40,
         fill: 'yellow',
         stroke: 'black',
+        align: 'center',
         strokeThickness: 5,
     });
 
@@ -62,8 +67,7 @@ export function write(text, options) {
         label.anchor.set(.5);
     }
 
-    const textObj = new Text(label);
-
+    const textObj = new Text(label, !(options && options.location === 'left'));
 
     if (options && options.group !== undefined) {
         if (groups[options.group] && groups[options.group].isAlive) {

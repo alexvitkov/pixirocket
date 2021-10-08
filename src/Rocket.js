@@ -13,7 +13,6 @@ const thrustTexture = PIXI.Texture.from("assets/thrust.png");
 
 export default class Rocket {
     constructor(x, rocketData) {
-
         this.rocketData = rocketData;
 
         // Current stage of the rocket, either 1 or 2
@@ -87,6 +86,9 @@ export default class Rocket {
     }
 
     destroy() {
+        if (this.onDestroyCallback)
+            this.onDestroyCallback();
+
         this.container.destroy();
         ScreenText.write(`${this.rocketData.name} launched!`);
         app.ticker.remove(this.tickFn);
@@ -120,6 +122,10 @@ export default class Rocket {
 
     }
 
+    onDestroy(fn) {
+        this.onDestroyCallback = fn;
+    }
+
     tick() {
         this.updateY();
 
@@ -150,7 +156,5 @@ export default class Rocket {
             const thrustTargetY = -this.rocketScale * rocketBottomTexture.height;
             this.thrustSprite.y = lerp(this.thrustSprite.y, thrustTargetY, 0.1 * dt);
         }
-
-
     }
 };

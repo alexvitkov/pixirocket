@@ -3,6 +3,7 @@ import * as Text from "./ScreenText";
 import Rocket from "./Rocket";
 
 var rockets;
+var aliveRocketsCount;
 
 export default app = new PIXI.Application({
     width: Config.SCREEN_WIDTH,
@@ -27,9 +28,22 @@ window['increaseTimeScale'] = function() {
 function launchRockets(afterSeconds) {
     Text.write(afterSeconds == 0 ? "Launch!" : afterSeconds);
 
+    aliveRocketsCount = rockets.length;
+
     if (afterSeconds == 0) {
-        for (const rocket of rockets)
+        for (const rocket of rockets) {
             rocket.launch();
+
+            // Show 'Success' once all rockets have launched
+            rocket.onDestroy(() => {
+                aliveRocketsCount -= 1;
+
+                console.log(aliveRocketsCount)
+                if (aliveRocketsCount == 0)
+                    setTimeout(() => Text.write('Success!'), 1000);
+            });
+
+        }
     }
     else {
         setTimeout(() => launchRockets(afterSeconds - 1), 1000);
