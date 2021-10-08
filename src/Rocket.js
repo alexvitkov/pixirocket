@@ -2,6 +2,7 @@ import * as Config from "./Config";
 import FuelBar from "./FuelBar";
 import FloatingBottomPart from "./FloatingBottomPart";
 import app from "./App";
+import { timeScale } from "./App";
 import * as ScreenText from "./ScreenText";
 import { random, lerp, clamp } from "./Util";
 
@@ -87,7 +88,7 @@ export default class Rocket {
 
     destroy() {
         this.container.destroy();
-        ScreenText.write(this.rocketData.name + " launched!");
+        ScreenText.write(`${this.rocketData.name} launched!`);
         app.ticker.remove(this.tickFn);
     }
 
@@ -127,7 +128,7 @@ export default class Rocket {
 
         const dt = app.ticker.deltaTime;
 
-        this.fuel -= dt;
+        this.fuel -= timeScale * dt;
 
         if (this.fuel < this.stage2Fuel && this.stage == 1)
             this.enterStage2();

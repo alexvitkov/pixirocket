@@ -2,7 +2,7 @@ import * as Config from "./Config";
 import * as Text from "./ScreenText";
 import Rocket from "./Rocket";
 
-
+var rockets;
 
 export default app = new PIXI.Application({
     width: Config.SCREEN_WIDTH,
@@ -10,14 +10,20 @@ export default app = new PIXI.Application({
 });
 
 
+// Since the rockets have vastly different fuel capacities
+// and the problem requires that they all burn 1 ton every second
+// they will finish in vastly different times.
+// Without a time scale option, the starship will take like 5 minutes to deplete its fuel
+export var timeScale = 1.0;
+window['increaseTimeScale'] = function() {
+    timeScale *= 1.2;
+    Text.write(`Time scale: ${Math.floor(timeScale * 100)}%`, {
+        location: 'left',
+        group: 1,
+    });
+}
 
-
-
-var rockets; // A list of the active Rockets
-
-
-// launchRockets writes the 3, 2, 1, Go! text on the screen
-// and calls the launch method on all the rockets
+// launchRockets writes the 3, 2, 1, Go! text on the screen and calls the launch method on all the rockets
 function launchRockets(afterSeconds) {
     Text.write(afterSeconds == 0 ? "Launch!" : afterSeconds);
 
@@ -29,6 +35,7 @@ function launchRockets(afterSeconds) {
         setTimeout(() => launchRockets(afterSeconds - 1), 1000);
     }
 }
+
 
 async function start() {
     // Add the PixiJS canvas to the document
