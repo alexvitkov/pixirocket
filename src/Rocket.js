@@ -90,7 +90,7 @@ export default class Rocket {
 
         p = 1 - (1 - p) * (1 - p); // square interpolation looks nicer
 
-        let new_y = (Config.CANVAS_HEIGHT - this.rocketSize) * p + this.rocketSize;
+        let new_y = (Config.CANVAS_HEIGHT ) * p ;
         let old_y = this.container.y;
         this.container.y = new_y;
 
