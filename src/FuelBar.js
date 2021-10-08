@@ -16,10 +16,12 @@ export default class FuelBar {
     update(percentage) {
         this.fuelBar.clear();
 
+        // Draw the background
         this.fuelBar.beginFill(0x000000);
         this.fuelBar.lineStyle(2, 0xFF0000);
         this.fuelBar.drawRect(0, 0, this.width, this.height);
 
+        // Draw the filled part
         this.fuelBar.beginFill(0xFFFF00);
         this.fuelBar.lineStyle(2, 0xFF0000);
         this.fuelBar.drawRect(0, (1.0 - percentage) * this.height, this.width, percentage * this.height);

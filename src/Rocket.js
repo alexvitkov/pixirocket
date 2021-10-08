@@ -12,54 +12,65 @@ const thrustTexture = PIXI.Texture.from("assets/thrust.png");
 
 export default class Rocket {
     constructor(x, rocketData) {
-        this.stage = 1;
-
-        this.stage1Fuel = rocketData.first_stage.fuel_amount_tons;;
-        this.stage2Fuel = rocketData.second_stage.fuel_amount_tons;;
-        this.fuel = this.stage1Fuel + this.stage2Fuel;
 
         this.rocketData = rocketData;
+
+        // Current stage of the rocket, either 1 or 2
+        this.stage = 1;
+
+        // Load the fuel capacity from the rocket data
+        this.stage1Fuel = rocketData.first_stage.fuel_amount_tons;;
+        this.stage2Fuel = rocketData.second_stage.fuel_amount_tons;;
+
+        // Current fuel value
+        this.fuel = this.stage1Fuel + this.stage2Fuel;
+
+        // This gets set to true from this.launch() after the initial countdown
         this.launched = false;
 
+        // Container for the rocket sprites, the label, the thrust and the fuel bars
         this.container = new PIXI.Container();
 
-        // The rocket sprite itself
-        this.rocketSprite = new PIXI.Sprite(rocketTopTexture);
-        this.rocketBottomSprite = new PIXI.Sprite(rocketBottomTexture);
-        this.rocketSprite.anchor.set(0.5, 1.5);
-        this.rocketBottomSprite.anchor.set(0.5, .5);
-
+        // We resize the rockets based on the data from the JSON to make them look nicer
         this.rocketScale = rocketData.height.meters * Config.ROCKET_SCALE;
         this.rocketSize = this.rocketScale * (rocketTopTexture.height + rocketBottomTexture.height);
 
-        this.rocketBottomSprite.y = -rocketBottomTexture.height * this.rocketScale * 0.5;
+        // Create the rocket itself
+        this.rocketTop = new PIXI.Sprite(rocketTopTexture);
+        this.rocketTop.anchor.set(0.5, 1.5);
+        this.rocketTop.scale.set(this.rocketScale)
 
-        this.rocketSprite.scale.set(this.rocketScale)
-        this.rocketBottomSprite.scale.set(this.rocketScale);
+        this.rocketBottom = new PIXI.Sprite(rocketBottomTexture);
+        this.rocketBottom.scale.set(this.rocketScale);
+        this.rocketBottom.anchor.set(0.5, .5);
+        this.rocketBottom.y = -rocketBottomTexture.height * this.rocketScale * 0.5;
 
+
+        // Create the thrust
         this.thrustSprite = new PIXI.Sprite(thrustTexture);
-        this.thrustAnchor = 0.1;
-        this.thrustSprite.anchor.set(0.5, this.thrustAnchor);
+        this.thrustSprite.anchor.set(0.5, 0.1);
 
+        // The order in which we add the sprites matters
+        // the thrust must be behind rocketBottom
         this.container.addChild(this.thrustSprite);
-        this.container.addChild(this.rocketSprite);
-        this.container.addChild(this.rocketBottomSprite);
+        this.container.addChild(this.rocketBottom);
+        this.container.addChild(this.rocketTop);
 
-        // The label that shows the rocket's name under the sprite
+        // Create a label to show the rocket name
         let label = new PIXI.Text(rocketData.name, { fontFamily: 'Arial', fontSize: 20, fill: 0xffffff });
-        this.container.addChild(label);
         label.anchor.set(0.5);
         label.y = -this.rocketSize - 15;
+        this.container.addChild(label);
 
         // Stage 1 fuel bar
         this.fuelBar1 = new FuelBar(10, this.rocketSize);
         this.container.addChild(this.fuelBar1.container);
-        this.fuelBar1.container.x = this.rocketSprite.width/2 + 5;
+        this.fuelBar1.container.x = this.rocketTop.width/2 + 5;
 
         // Stage 2 fuel bar
         this.fuelBar2 = new FuelBar(10, this.rocketSize * this.stage2Fuel / (this.stage1Fuel + this.stage2Fuel));
         this.container.addChild(this.fuelBar2.container);
-        this.fuelBar2.container.x = this.rocketSprite.width/2 + 15;
+        this.fuelBar2.container.x = this.fuelBar1.container.x + 10;
 
         // Initial position of the container
         this.container.x = x;
@@ -83,25 +94,30 @@ export default class Rocket {
     updateY() {
         let p = this.fuel / (this.stage1Fuel + this.stage2Fuel);
 
-        p = 1 - (1 - p) * (1 - p); // square interpolation looks nicer
+        // Rockets don't launch at a constant speed, they get faster
+        // fade-in interpolation looks nicer.
+        p = 1 - (1 - p) * (1 - p); 
 
-        let new_y = (Config.SCREEN_HEIGHT ) * p ;
-        let old_y = this.container.y;
-        this.container.y = new_y;
+        let newY = (Config.SCREEN_HEIGHT ) * p;
+        this.container.y = newY;
 
-        // this is needed for when we lose the bottom part,
-        // to give it a sensible initial velocity
-        this.yVelocity = (new_y - old_y) / app.ticker.deltaTime;
+        let oldY = this.container.y;
+
+        // yVelocity is needed for when we lose the bottom part of the rocket
+        // so we can give it a sensible initial velocity
+        // this is not accurate at all but works OK for that purpose
+        this.yVelocity = (newY - oldY) / app.ticker.deltaTime;
     }
 
-    enter_stage2() {
+    enterStage2() {
         if (this.stage == 2)
             return;
 
-        // Lose the bottom part
-        new FloatingBottomPart(this.rocketBottomSprite, clamp(this.yVelocity, -10, 0));
-
         this.stage = 2;
+
+        // Lose the bottom part
+        new FloatingBottomPart(this.rocketBottom, clamp(this.yVelocity, -10, 0));
+
     }
 
     tick() {
@@ -110,10 +126,12 @@ export default class Rocket {
         if (!this.launched)
             return;
 
-        this.fuel -= app.ticker.deltaTime;
+        const dt = app.ticker.deltaTime;
+
+        this.fuel -= dt;
 
         if (this.fuel < this.stage2Fuel && this.stage == 1)
-            this.enter_stage2();
+            this.enterStage2();
 
         if (this.fuel <= 0) {
             this.destroy();
@@ -127,8 +145,10 @@ export default class Rocket {
         this.fuelBar2.update(clamp(this.fuel / this.stage2Fuel, 0, 1));
 
         if (this.stage == 2) {
-            this.thrustAnchor = lerp(this.thrustAnchor, 0.5, 0.1 * app.ticker.deltaTime);
-            this.thrustSprite.anchor.set(0.5, this.thrustAnchor);
+            // dirty hack to reposition the thrust sprite after the second stage
+            // so it doesn't float where the bottom part used to be
+            const thrustTargetY = -this.rocketScale * rocketBottomTexture.height;
+            this.thrustSprite.y = lerp(this.thrustSprite.y, thrustTargetY, 0.1 * dt);
         }
 
 
