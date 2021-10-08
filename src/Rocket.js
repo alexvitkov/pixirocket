@@ -12,10 +12,11 @@ const thrustTexture = PIXI.Texture.from("assets/thrust.png");
 
 export default class Rocket {
     constructor(x, rocketData) {
-        this.fuel1 = rocketData.first_stage.fuel_amount_tons;
-        this.fuel2 = rocketData.second_stage.fuel_amount_tons;
-        this.initialFuel1 = this.fuel1;
-        this.initialFuel2 = this.fuel2;
+        this.stage = 1;
+
+        this.stage1Fuel = rocketData.first_stage.fuel_amount_tons;;
+        this.stage2Fuel = rocketData.second_stage.fuel_amount_tons;;
+        this.fuel = this.stage1Fuel + this.stage2Fuel;
 
         this.rocketData = rocketData;
         this.launched = false;
@@ -50,12 +51,13 @@ export default class Rocket {
         label.anchor.set(0.5);
         label.y = -this.rocketSize - 15;
 
-        // Fuel bar
+        // Stage 1 fuel bar
         this.fuelBar1 = new FuelBar(10, this.rocketSize);
         this.container.addChild(this.fuelBar1.container);
         this.fuelBar1.container.x = this.rocketSprite.width/2 + 5;
 
-        this.fuelBar2 = new FuelBar(10, this.rocketSize * this.fuel2 / this.fuel1);
+        // Stage 2 fuel bar
+        this.fuelBar2 = new FuelBar(10, this.rocketSize * this.stage2Fuel / (this.stage1Fuel + this.stage2Fuel));
         this.container.addChild(this.fuelBar2.container);
         this.fuelBar2.container.x = this.rocketSprite.width/2 + 15;
 
@@ -78,17 +80,8 @@ export default class Rocket {
         app.ticker.remove(this.tickFn);
     }
 
-    lose_bottom_part() {
-        new FloatingBottomPart(this.rocketBottomSprite, clamp(this.yVelocity, -10, 0));
-    }
-
-    get_fuel_percentage() {
-        return (this.fuel1 + this.fuel2) / (this.initialFuel1 + this.initialFuel2);
-    }
-
-
-    update_y() {
-        let p = this.get_fuel_percentage();
+    updateY() {
+        let p = this.fuel / (this.stage1Fuel + this.stage2Fuel);
 
         p = 1 - (1 - p) * (1 - p); // square interpolation looks nicer
 
@@ -101,37 +94,43 @@ export default class Rocket {
         this.yVelocity = (new_y - old_y) / app.ticker.deltaTime;
     }
 
+    enter_stage2() {
+        if (this.stage == 2)
+            return;
+
+        // Lose the bottom part
+        new FloatingBottomPart(this.rocketBottomSprite, clamp(this.yVelocity, -10, 0));
+
+        this.stage = 2;
+    }
+
     tick() {
-        this.update_y();
+        this.updateY();
+
         if (!this.launched)
             return;
 
-        if (this.fuel1 > 0) {
-            this.fuel1 -= app.ticker.deltaTime;
-            if (this.fuel1 <= 0) {
-                this.fuel1 = 0;
-                this.lose_bottom_part();
-            }
+        this.fuel -= app.ticker.deltaTime;
+
+        if (this.fuel < this.stage2Fuel && this.stage == 1)
+            this.enter_stage2();
+
+        if (this.fuel <= 0) {
+            this.destroy();
+            return;
         }
-        else {
-            this.fuel2 -= app.ticker.deltaTime;
-            if (this.fuel2 < 0) {
-                this.fuel2 = 0;
 
-                this.destroy();
-                return;
-            }
+        this.thrustSprite.rotation = Math.random() * 0.1;
+        this.thrustSprite.scale.set(this.rocketScale * random(0.9, 1.1));
 
+        this.fuelBar1.update(clamp((this.fuel - this.stage2Fuel) / this.stage1Fuel, 0, 1));
+        this.fuelBar2.update(clamp(this.fuel / this.stage2Fuel, 0, 1));
+
+        if (this.stage == 2) {
             this.thrustAnchor = lerp(this.thrustAnchor, 0.5, 0.1 * app.ticker.deltaTime);
             this.thrustSprite.anchor.set(0.5, this.thrustAnchor);
         }
 
 
-        this.fuelBar1.update(this.fuel1 / this.initialFuel1);
-        this.fuelBar2.update(this.fuel2 / this.initialFuel2);
-
-
-        this.thrustSprite.rotation = Math.random() * 0.1;
-        this.thrustSprite.scale.set(this.rocketScale * random(0.9, 1.1));
     }
 };
