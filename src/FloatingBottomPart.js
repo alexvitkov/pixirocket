@@ -21,18 +21,18 @@ export default class FloatingBottomPart {
 
     tick() {
         const dt = app.ticker.deltaTime;
-        this.velocity += Config.BOTTOM_PART_GRAVITY_SCALE * dt;
+        this.velocity += Config.BottomPart.GRAVITY_SCALE * dt;
 
-        this.angularVelocity += Config.BOTTOM_PART_ROTATION_SCALE * dt;
-        if (this.angularVelocity > Config.BOTTOM_PART_MAX_ROTATION_SPEED)
-            this.angularVelocity = Config.BOTTOM_PART_MAX_ROTATION_SPEED;
+        this.angularVelocity += Config.BottomPart.ROTATION_SCALE * dt;
+        if (this.angularVelocity > Config.BottomPart.MAX_ROTATION_SPEED)
+            this.angularVelocity = Config.BottomPart.MAX_ROTATION_SPEED;
 
-        this.sprite.y += Config.BOTTOM_PART_GRAVITY_SCALE * this.velocity;
+        this.sprite.y += Config.BottomPart.GRAVITY_SCALE * this.velocity;
         this.sprite.rotation += this.angularVelocity * dt;
 
         // The scale decreases over time to give the effect the part is flying away
         // We delete the object after it reaches 0
-        this.sprite.scale.set(this.sprite.scale.x - Config.BOTTOM_PART_SCALE_DECREASE_SCALE * dt);
+        this.sprite.scale.set(this.sprite.scale.x - Config.BottomPart.SCALE_DECREASE * dt);
         if (this.sprite.scale.x < 0) {
             app.ticker.remove(this.tickFn);
             this.sprite.destroy();
